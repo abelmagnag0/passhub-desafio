@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PassHub — Cotar valores</title>
+    <link rel="icon" type="image/svg+xml" href="/brand/favicon.svg" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <style>
+      @font-face {
+        font-family: Aspekta;
+        src: url('/fonts/AspektaVF.woff2') format('woff2');
+        font-weight: 100 900;
+        font-style: normal;
+        font-display: swap;
+      }
+    </style>
+    
+    <svg width="0" height="0" style="position:absolute">
+      <defs>
+        <symbol id="i-plane" viewBox="0 0 24 24"><path d="M2.5 19.5 21 12 2.5 4.5l3 7.5-3 7.5Zm3-7.5H13" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+        <symbol id="i-bag" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 8V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v3" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+        <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h15m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+        <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M3 9V6a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v3a2.5 2.5 0 0 0 0 6v3a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-3a2.5 2.5 0 0 0 0-6Z" fill="none" stroke="currentColor" stroke-width="2"/><path d="M13 5v2m0 4v2m0 4v2" stroke="currentColor" stroke-width="2"/></symbol>
+        <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+        <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8L12 3Zm7 10 1 2.6L22.6 17 20 18l-1 2.6L18 18l-2.6-1L18 15.6l1-2.6Z" fill="currentColor"/></symbol>
+        <symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 10h18M8 3v4m8-4v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+        <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M3 12h18M12 3c2.5 2.6 4 5.6 4 9s-1.5 6.4-4 9c-2.5-2.6-4-5.6-4-9s1.5-6.4 4-9Z" fill="none" stroke="currentColor" stroke-width="1.6"/></symbol>
+        <symbol id="i-chart" viewBox="0 0 24 24"><path d="M4 20V10m6 10V4m6 16v-7m4 7H2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+        <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21C7 16.5 3 13 3 8.8 3 6 5.2 4 7.8 4c1.7 0 3.2.9 4.2 2.3C13 4.9 14.5 4 16.2 4 18.8 4 21 6 21 8.8c0 4.2-4 7.7-9 12.2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+        <symbol id="i-activity" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+        <symbol id="i-ghost" viewBox="0 0 24 24"><path d="M12 3a7 7 0 0 0-7 7v10l2.4-2 2.3 2 2.3-2 2.3 2 2.3-2 2.4 2V10a7 7 0 0 0-7-7Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="9.5" cy="10" r="1.2" fill="currentColor"/><circle cx="14.5" cy="10" r="1.2" fill="currentColor"/></symbol>
+      </defs>
+    </svg>
+
+    <div class="shell">
+      <!-- ===================== sidebar ===================== -->
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <img class="logo" src="/brand/logo.svg" alt="PassHub" />
+          <button class="collapse-btn" title="recolher">«</button>
+        </div>
+        <nav>
+          <p class="nav-section">Cotações</p>
+          <a class="nav-item active" href="/cotacoes" data-nav="busca"><span class="nav-ico"><svg width="15" height="15"><use href="#i-plane"/></svg></span> Aéreo</a>
+
+          <p class="nav-section">Geral</p>
+          <a class="nav-item" href="/dashboard" data-nav="metricas"><span class="nav-ico"><svg width="15" height="15"><use href="#i-chart"/></svg></span> Dashboard</a>
+          <a class="nav-item" href="/status" data-nav="saude"><span class="nav-ico"><svg width="15" height="15"><use href="#i-heart"/></svg></span> Status do sistema</a>
+          <a class="nav-item" href="/telemetria" data-nav="telemetria"><span class="nav-ico"><svg width="15" height="15"><use href="#i-activity"/></svg></span> Telemetria</a>
+        </nav>
+      </aside>
+
+      <!-- ===================== conteúdo ===================== -->
+      <div class="content-area show-summary">
+        <main class="main-col">
+          <!-- BUSCA -->
+          <section id="tab-busca" class="tab active">
+            <header class="page-head">
+              <h1>Cotar valores</h1>
+              <div class="mode-toggle">
+                <button class="mode active" disabled><svg width="14" height="14"><use href="#i-search"/></svg> Busca Manual</button>
+                <button class="mode" disabled data-tip="Funcionalidade em desenvolvimento"><svg width="14" height="14"><use href="#i-sparkle"/></svg> Busca por IA</button>
+              </div>
+            </header>
+
+            <div class="search-card">
+              <div class="chips-row">
+                <button class="chip active" data-trip="ow"><svg width="14" height="14"><use href="#i-arrow"/></svg> Só ida</button>
+                <button class="chip" disabled data-tip="Em desenvolvimento"><svg width="14" height="14"><use href="#i-bag"/></svg> Ida e Volta</button>
+                <button class="chip" disabled data-tip="Em desenvolvimento"><svg width="14" height="14"><use href="#i-ticket"/></svg> Multitrecho</button>
+                <div class="select-wrap" data-tip="Em desenvolvimento">
+                  <select disabled aria-disabled="true"><option>Econômica</option></select>
+                </div>
+                <div class="select-wrap" data-tip="Em desenvolvimento">
+                  <select disabled aria-disabled="true"><option>RAV R$ —</option></select>
+                </div>
+                <div class="select-wrap pax" data-tip="Em desenvolvimento">
+                  <select disabled aria-disabled="true"><option>1 Passageiro</option></select>
+                </div>
+              </div>
+
+              <form id="search-form" class="fields-row">
+                <div class="field">
+                  <label>Origem</label>
+                  <div class="airport-box" id="origin-box">
+                    <span class="airport-tag hidden" id="origin-tag">
+                      <svg width="13" height="13"><use href="#i-plane"/></svg>
+                      <span class="airport-tag-text"></span>
+                      <button type="button" class="tag-x" title="limpar">×</button>
+                    </span>
+                    <input id="origin" placeholder="Cidade ou aeroporto" autocomplete="off" />
+                    <div class="airport-list hidden" id="origin-list"></div>
+                  </div>
+                </div>
+                <button type="button" class="swap" id="swap" title="inverter">⇄</button>
+                <div class="field">
+                  <label>Destino</label>
+                  <div class="airport-box" id="destination-box">
+                    <span class="airport-tag hidden" id="destination-tag">
+                      <svg width="13" height="13"><use href="#i-plane"/></svg>
+                      <span class="airport-tag-text"></span>
+                      <button type="button" class="tag-x" title="limpar">×</button>
+                    </span>
+                    <input id="destination" placeholder="Cidade ou aeroporto" autocomplete="off" />
+                    <div class="airport-list hidden" id="destination-list"></div>
+                  </div>
+                </div>
+                <div class="field dates">
+                  <label>Data</label>
+                  <div class="date-input" id="date-depart-wrap">
+                    <span class="cal-ico"><svg width="14" height="14"><use href="#i-cal"/></svg></span>
+                    <button type="button" class="date-btn" id="date-depart-btn">—</button>
+                  </div>
+                </div>
+                <button type="submit" id="btn-search" class="btn-buscar">BUSCAR</button>
+                <input type="hidden" id="date" />
+                <input type="hidden" id="date-return" />
+              </form>
+
+              <div class="recent-row">
+                <span class="recent-label">Últimas buscas:</span>
+                <div id="recent-list" class="recent-list"></div>
+                <button id="recent-clear" class="recent-clear">× Limpar</button>
+              </div>
+            </div>
+
+            <div id="search-status" class="status-bar hidden"></div>
+
+            <div id="results-head" class="results-head hidden">
+              <span id="results-count"></span>
+              <div class="results-filters">
+                <select id="filter-period" aria-label="filtrar por período">
+                  <option value="all">Todos os períodos</option>
+                  <option value="morning">Manhã (antes das 12h)</option>
+                  <option value="afternoon">Tarde (12h às 18h)</option>
+                  <option value="night">Noite (após as 18h)</option>
+                </select>
+                <select id="filter-airline" aria-label="filtrar por companhia">
+                  <option value="all">Todas as companhias</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="results" class="results hidden"></div>
+
+            <div class="academy-banner">
+              <div class="academy-copy">
+                <div class="academy-logo"><svg width="18" height="18"><use href="#i-globe"/></svg> PassHub</div>
+                <h2>Aprenda a vender tudo<br /><span>na PassHub Academy.</span></h2>
+                <p>23 aulas curtas, em 5 módulos, direto da tela da plataforma: da primeira busca ao primeiro link pago. São <strong>21 minutos</strong> no total.</p>
+                <button class="academy-cta">Começar pela aula 1 <svg width="14" height="14"><use href="#i-arrow"/></svg></button>
+              </div>
+              <div class="academy-mockup">
+                <div class="mockup-screen">
+                  <div class="mockup-bar"><i></i><i></i><i></i></div>
+                  <div class="mockup-body">
+                    <span class="mockup-num">01</span>
+                    <div class="mockup-panel">
+                      <span class="mockup-badge">MÓDULO 1 · Primeiros passos</span>
+                      <span class="mockup-title">Visão geral da<br />plataforma</span>
+                      <span class="mockup-brand">PassHub</span>
+                    </div>
+                  </div>
+                  <button class="mockup-play"><svg width="15" height="15" viewBox="0 0 24 24"><path d="M8 5v14l11-7-11-7Z" fill="currentColor"/></svg></button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- SAÚDE -->
+          <section id="tab-saude" class="tab">
+            <header class="page-head">
+              <h1>Status do sistema</h1>
+              <button id="health-refresh" class="btn-ghost">Atualizar</button>
+            </header>
+            <p class="hint">Disponibilidade por hora nas últimas 24h. Cada vela é uma hora; as cinzas ainda não têm registro — nunca inventamos uptime passado.</p>
+            <div id="status-rows" class="status-rows"><div class="card">Carregando histórico…</div></div>
+          </section>
+
+          <!-- DASHBOARD -->
+          <section id="tab-metricas" class="tab">
+            <header class="page-head">
+              <h1>Dashboard</h1>
+              <button id="metrics-refresh" class="btn-ghost">Atualizar</button>
+            </header>
+            <div id="dashboard-body">
+              <div class="card">Carregando…</div>
+            </div>
+          </section>
+
+          <section id="tab-telemetria" class="tab">
+            <header class="page-head">
+              <h1>Telemetria</h1>
+              <button id="telemetry-refresh" class="btn-ghost">Atualizar</button>
+            </header>
+            <div id="telemetry-body">
+              <div class="card">Carregando…</div>
+            </div>
+          </section>
+        </main>
+
+        <!-- ===================== resumo lateral (só na aba Cotar valores) ===================== -->
+        <aside class="summary-col">
+          <h3>Seu resumo</h3>
+          <div id="summary-empty" class="summary-empty">
+            <svg width="30" height="30"><use href="#i-ghost"/></svg>
+            <p>Selecione um voo para ver o resumo</p>
+          </div>
+          <div id="summary-body" class="summary-body hidden"></div>
+        </aside>
+      </div>
+    </div>
+    
+    <div class="resolution-gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+      <div class="gate-card">
+        <div class="gate-icon">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="13" rx="2"/>
+            <path d="M8 21h8m-4-4v4"/>
+          </svg>
+        </div>
+        <h2 id="gate-title">Esta tela pede uma janela maior</h2>
+        <p>A PassHub é uma ferramenta de trabalho feita para o desktop —
+           cotar, comparar e emitir pedem espaço para a lista e o resumo
+           lado a lado.</p>
+        <p class="gate-hint">
+          Sua janela está em <span class="gate-size" id="gate-size">—</span>.
+          A partir de <span class="gate-size">1280px</span> de largura tudo aparece.
+        </p>
+      </div>
+    </div>
+
+    <script type="module" src="/js/main.js"></script>
+  </body>
+</html>

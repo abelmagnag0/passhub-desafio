@@ -1,0 +1,291 @@
+{
+  "results": [
+    {
+      "airline_name": "Latam",
+      "amount": 83839,
+      "currency": "BRL",
+      "departure": "08:00",
+      "arrival": "11:10"
+    },
+    {
+      "airline_name": "Azul",
+      "amount": 80824,
+      "currency": "BRL",
+      "departure": "08:15",
+      "arrival": "11:30"
+    },
+    {
+      "airline_name": "Passaredo",
+      "amount": 49053,
+      "currency": "BRL",
+      "departure": "22:30",
+      "arrival": "01:15"
+    },
+    {
+      "airline_name": "Gol",
+      "amount": 59631,
+      "currency": "BRL",
+      "departure": "05:19",
+      "arrival": "06:42"
+    },
+    {
+      "airline_name": "Azul",
+      "amount": 64439,
+      "currency": "BRL",
+      "departure": "05:38",
+      "arrival": "07:24"
+    },
+    {
+      "airline_name": "Gol",
+      "amount": 67504,
+      "currency": "BRL",
+      "departure": "06:35",
+      "arrival": "09:30"
+    },
+    {
+      "airline_name": "Passaredo",
+      "amount": 49836,
+      "currency": "BRL",
+      "departure": "06:54",
+      "arrival": "10:12"
+    },
+    {
+      "airline_name": "Latam",
+      "amount": 88348,
+      "currency": "BRL",
+      "departure": "07:13",
+      "arrival": "08:24"
+    },
+    {
+      "airline_name": "Gol",
+      "amount": 90897,
+      "currency": "BRL",
+      "departure": "07:32",
+      "arrival": "09:06"
+    },
+    {
+      "airline_name": "Azul",
+      "amount": 84681,
+      "currency": "BRL",
+      "departure": "07:51",
+      "arrival": "09:48"
+    },
+    {
+      "airline_name": "Azul",
+      "amount": 89947,
+      "currency": "BRL",
+      "departure": "08:29",
+      "arrival": "11:12"
+    },
+    {
+      "airline_name": "Passaredo",
+      "amount": 65200,
+      "currency": "BRL",
+      "departure": "09:07",
+      "arrival": "12:36"
+    },
+    {
+      "airline_name": "Latam",
+      "amount": 93732,
+      "currency": "BRL",
+      "departure": "09:26",
+      "arrival": "10:48"
+    },
+    {
+      "airline_name": "Latam",
+      "amount": 93961,
+      "currency": "BRL",
+      "departure": "10:23",
+      "arrival": "12:54"
+    },
+    {
+      "airline_name": "Azul",
+      "amount": 80734,
+      "currency": "BRL",
+      "departure": "10:42",
+      "arrival": "13:36"
+    },
+    {
+      "airline_name": "Gol",
+      "amount": 91902,
+      "currency": "BRL",
+      "departure": "11:01",
+      "arrival": "14:18"
+    },
+    {
+      "airline_name": "Passaredo",
+      "amount": 46469,
+      "currency": "BRL",
+      "departure": "11:20",
+      "arrival": "12:30"
+    },
+    {
+      "airline_name": "Latam",
+      "amount": 84114,
+      "currency": "BRL",
+      "departure": "11:39",
+      "arrival": "13:12"
+    },
+    {
+      "airline_name": "Azul",
+      "amount": 80472,
+      "currency": "BRL",
+      "departure": "12:17",
+      "arrival": "14:36"
+    },
+    {
+      "airline_name": "Azul",
+      "amount": 85347,
+      "currency": "BRL",
+      "departure": "12:55",
+      "arrival": "16:00"
+    },
+    {
+      "airline_name": "Gol",
+      "amount": 83647,
+      "currency": "BRL",
+      "departure": "13:14",
+      "arrival": "16:42"
+    },
+    {
+      "airline_name": "Gol",
+      "amount": 78897,
+      "currency": "BRL",
+      "departure": "14:11",
+      "arrival": "16:18"
+    },
+    {
+      "airline_name": "Azul",
+      "amount": 73180,
+      "currency": "BRL",
+      "departure": "14:30",
+      "arrival": "17:00"
+    },
+    {
+      "airline_name": "Latam",
+      "amount": 90737,
+      "currency": "BRL",
+      "departure": "14:49",
+      "arrival": "17:42"
+    },
+    {
+      "airline_name": "Azul",
+      "amount": 90065,
+      "currency": "BRL",
+      "departure": "15:08",
+      "arrival": "18:24"
+    },
+    {
+      "airline_name": "Gol",
+      "amount": 70293,
+      "currency": "BRL",
+      "departure": "15:27",
+      "arrival": "16:36"
+    },
+    {
+      "airline_name": "Latam",
+      "amount": 81371,
+      "currency": "BRL",
+      "departure": "16:05",
+      "arrival": "18:00"
+    },
+    {
+      "airline_name": "Azul",
+      "amount": 77600,
+      "currency": "BRL",
+      "departure": "16:43",
+      "arrival": "19:24"
+    },
+    {
+      "airline_name": "Latam",
+      "amount": 113146,
+      "currency": "BRL",
+      "departure": "17:02",
+      "arrival": "20:06"
+    },
+    {
+      "airline_name": "Passaredo",
+      "amount": 56179,
+      "currency": "BRL",
+      "departure": "17:59",
+      "arrival": "19:42"
+    },
+    {
+      "airline_name": "Latam",
+      "amount": 101696,
+      "currency": "BRL",
+      "departure": "18:18",
+      "arrival": "20:24"
+    },
+    {
+      "airline_name": "Gol",
+      "amount": 89639,
+      "currency": "BRL",
+      "departure": "18:37",
+      "arrival": "21:06"
+    },
+    {
+      "airline_name": "Azul",
+      "amount": 96907,
+      "currency": "BRL",
+      "departure": "18:56",
+      "arrival": "21:48"
+    },
+    {
+      "airline_name": "Latam",
+      "amount": 102782,
+      "currency": "BRL",
+      "departure": "19:15",
+      "arrival": "22:30"
+    },
+    {
+      "airline_name": "Gol",
+      "amount": 93056,
+      "currency": "BRL",
+      "departure": "19:53",
+      "arrival": "21:24"
+    },
+    {
+      "airline_name": "Latam",
+      "amount": 91112,
+      "currency": "BRL",
+      "departure": "20:31",
+      "arrival": "22:48"
+    },
+    {
+      "airline_name": "Gol",
+      "amount": 80520,
+      "currency": "BRL",
+      "departure": "20:50",
+      "arrival": "23:30"
+    },
+    {
+      "airline_name": "Azul",
+      "amount": 59887,
+      "currency": "BRL",
+      "departure": "21:47",
+      "arrival": "23:06"
+    },
+    {
+      "airline_name": "Gol",
+      "amount": 59080,
+      "currency": "BRL",
+      "departure": "22:06",
+      "arrival": "23:48"
+    },
+    {
+      "airline_name": "Passaredo",
+      "amount": 43847,
+      "currency": "BRL",
+      "departure": "22:25",
+      "arrival": "00:30"
+    },
+    {
+      "airline_name": "Copa Airlines",
+      "amount": 21000,
+      "currency": "USD",
+      "departure": "14:40",
+      "arrival": "18:05"
+    }
+  ]
+}

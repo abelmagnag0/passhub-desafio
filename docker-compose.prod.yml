@@ -1,0 +1,69 @@
+# Overlay de produção: aplica sobre docker-compose.yml.
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+#     --env-file .env.deploy up -d --build
+#
+# Nenhuma variável aqui tem valor literal: todas vêm do `.env.deploy`, e
+# nenhuma pode faltar (`:?` aborta o `up` com a mensagem certa em vez de
+# subir o serviço pela metade). Antes, `IP_SALT:` vinha sem valor e
+# `NODE_ENV` nem existia — o funil anonimizava IP com salt vazio.
+services:
+  api:
+    environment:
+      REDIS_URL: ${REDIS_URL:?REDIS_URL ausente no .env.deploy}
+      UPSTASH_REDIS_REST_TOKEN: ${UPSTASH_REDIS_REST_TOKEN:?UPSTASH_REDIS_REST_TOKEN ausente no .env.deploy}
+      # salt de anonimização do funil: sem ele o hash de IP é quebrável
+      # por força bruta (2^32 IPv4). A API também recusa subir sem ele.
+      IP_SALT: ${IP_SALT:?IP_SALT ausente no .env.deploy — o funil gravaria hash de IP com segredo público}
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL ausente no .env.deploy}
+      PROVIDER_A_URL: http://provider-a:3000
+      PROVIDER_B_URL: http://provider-b:3000
+      PROVIDER_C_URL: http://provider-c:3000
+      LOG_LEVEL: info
+      NODE_ENV: production
+      # traces vão para o jaeger da própria instância: a árvore de spans
+      # fica visível em /traces (Caddy) sem abrir porta nova no firewall
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318
+    depends_on: !override
+      redis:
+        condition: service_healthy
+      # o banco segue obrigatório em prod: sem ele o painel lê o Redis
+      # em silêncio e a parte de histórico some do /dashboard
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  provider-a:
+    restart: unless-stopped
+  provider-b:
+    restart: unless-stopped
+  provider-c:
+    restart: unless-stopped
+  redis:
+    restart: unless-stopped
+  postgres:
+    restart: unless-stopped
+
+  # coletor de traces. MEMORY_MAX_TRACES limita a RAM: a t4g.small tem
+  # 2 GB e o serviço não pode competir com a API por memória
+  jaeger:
+    image: jaegertracing/all-in-one:1.76.0
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+      MEMORY_MAX_TRACES: "500"
+      SPAN_STORAGE_TYPE: memory
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  caddy_data:

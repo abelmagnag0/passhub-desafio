@@ -1,0 +1,17 @@
+node_modules
+dist
+tests
+*.test.ts
+vitest.config.ts
+Dockerfile
+.dockerignore
+.git
+.github
+mocks
+.internal
+.env
+.env.*
+docker-compose*.yml
+Makefile
+Caddyfile
+*.md

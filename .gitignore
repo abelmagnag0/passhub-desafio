@@ -1,0 +1,16 @@
+node_modules
+dist
+.env
+.env.*
+!.env.example
+__pycache__
+*.pyc
+.serverless
+
+# material de preparação (não é entrega)
+.internal
+
+# a Parte 2 (Figma) vive fora deste repositório, em ../passhub-part2/
+# estas entradas são uma rede de segurança contra commit acidental
+parte2/
+examples/

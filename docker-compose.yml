@@ -1,0 +1,100 @@
+name: passhub-desafio
+
+services:
+  provider-a:
+    build: ./mocks
+    image: passhub-mocks
+    environment:
+      PROVIDER: a
+    ports:
+      - "3001:3000"
+
+  provider-b:
+    build: ./mocks
+    image: passhub-mocks
+    environment:
+      PROVIDER: b
+    ports:
+      - "3002:3000"
+
+  provider-c:
+    build: ./mocks
+    image: passhub-mocks
+    environment:
+      PROVIDER: c
+    ports:
+      - "3003:3000"
+
+  provider-c-chaos:
+    build: ./mocks
+    image: passhub-mocks
+    profiles: [chaos]
+    environment:
+      PROVIDER: c
+      FAIL_RATE: "0.3"
+      TIMEOUT_RATE: "0.3"
+    ports:
+      - "3004:3000"
+
+  api:
+    build:
+      context: .
+      target: runtime
+    image: passhub-aggregator
+    environment:
+      PORT: "8000"
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgres://postgres:postgres@postgres:5432/passhub
+      PROVIDER_A_URL: http://provider-a:3000
+      PROVIDER_B_URL: http://provider-b:3000
+      PROVIDER_C_URL: http://provider-c:3000
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+      # o default versionado existe só para desenvolvimento; produção
+      # define o salt no .env.deploy e a API recusa subir sem ele
+      IP_SALT: ${IP_SALT:-dev-salt-nao-use-em-producao}
+      NODE_ENV: development
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: passhub
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.76.0
+    profiles: [observability]
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "16686:16686"
+      - "4318:4318"
+
+volumes:
+  pgdata:

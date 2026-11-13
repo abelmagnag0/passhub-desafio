@@ -1,0 +1,250 @@
+{
+  "data": [
+    {
+      "carrier": "Azul Linhas Aereas",
+      "fare": 830.4,
+      "departure_time": "08:15",
+      "arrival_time": "11:30"
+    },
+    {
+      "carrier": "Gol Linhas Aéreas",
+      "fare": 887.41,
+      "departure_time": "08:50",
+      "arrival_time": "12:05"
+    },
+    {
+      "carrier": "Voepass",
+      "fare": 503.97,
+      "departure_time": "22:30",
+      "arrival_time": "01:15"
+    },
+    {
+      "carrier": "Gol Linhas Aéreas",
+      "fare": 612.65,
+      "departure_time": "05:19",
+      "arrival_time": "06:42"
+    },
+    {
+      "carrier": "Latam Airlines",
+      "fare": 708.04,
+      "departure_time": "05:57",
+      "arrival_time": "08:06"
+    },
+    {
+      "carrier": "Azul Linhas Aereas",
+      "fare": 704.84,
+      "departure_time": "06:16",
+      "arrival_time": "08:48"
+    },
+    {
+      "carrier": "Gol Linhas Aéreas",
+      "fare": 693.55,
+      "departure_time": "06:35",
+      "arrival_time": "09:30"
+    },
+    {
+      "carrier": "Latam Airlines",
+      "fare": 907.69,
+      "departure_time": "07:13",
+      "arrival_time": "08:24"
+    },
+    {
+      "carrier": "Azul Linhas Aereas",
+      "fare": 870.02,
+      "departure_time": "07:51",
+      "arrival_time": "09:48"
+    },
+    {
+      "carrier": "Latam Airlines",
+      "fare": 1078.3,
+      "departure_time": "08:10",
+      "arrival_time": "10:30"
+    },
+    {
+      "carrier": "Azul Linhas Aereas",
+      "fare": 924.13,
+      "departure_time": "08:29",
+      "arrival_time": "11:12"
+    },
+    {
+      "carrier": "Voepass",
+      "fare": 669.87,
+      "departure_time": "09:07",
+      "arrival_time": "12:36"
+    },
+    {
+      "carrier": "Gol Linhas Aéreas",
+      "fare": 850.33,
+      "departure_time": "09:45",
+      "arrival_time": "11:30"
+    },
+    {
+      "carrier": "Azul Linhas Aereas",
+      "fare": 781.5,
+      "departure_time": "10:04",
+      "arrival_time": "12:12"
+    },
+    {
+      "carrier": "Latam Airlines",
+      "fare": 965.37,
+      "departure_time": "10:23",
+      "arrival_time": "12:54"
+    },
+    {
+      "carrier": "Gol Linhas Aéreas",
+      "fare": 944.21,
+      "departure_time": "11:01",
+      "arrival_time": "14:18"
+    },
+    {
+      "carrier": "Latam Airlines",
+      "fare": 864.2,
+      "departure_time": "11:39",
+      "arrival_time": "13:12"
+    },
+    {
+      "carrier": "Gol Linhas Aéreas",
+      "fare": 765.05,
+      "departure_time": "11:58",
+      "arrival_time": "13:54"
+    },
+    {
+      "carrier": "Azul Linhas Aereas",
+      "fare": 826.78,
+      "departure_time": "12:17",
+      "arrival_time": "14:36"
+    },
+    {
+      "carrier": "Azul Linhas Aereas",
+      "fare": 876.87,
+      "departure_time": "12:55",
+      "arrival_time": "16:00"
+    },
+    {
+      "carrier": "Voepass",
+      "fare": 506.34,
+      "departure_time": "13:33",
+      "arrival_time": "14:54"
+    },
+    {
+      "carrier": "Latam Airlines",
+      "fare": 787.78,
+      "departure_time": "13:52",
+      "arrival_time": "15:36"
+    },
+    {
+      "carrier": "Gol Linhas Aéreas",
+      "fare": 810.6,
+      "departure_time": "14:11",
+      "arrival_time": "16:18"
+    },
+    {
+      "carrier": "Latam Airlines",
+      "fare": 932.24,
+      "departure_time": "14:49",
+      "arrival_time": "17:42"
+    },
+    {
+      "carrier": "Gol Linhas Aéreas",
+      "fare": 722.2,
+      "departure_time": "15:27",
+      "arrival_time": "16:36"
+    },
+    {
+      "carrier": "Voepass",
+      "fare": 535.99,
+      "departure_time": "15:46",
+      "arrival_time": "17:18"
+    },
+    {
+      "carrier": "Latam Airlines",
+      "fare": 836.01,
+      "departure_time": "16:05",
+      "arrival_time": "18:00"
+    },
+    {
+      "carrier": "Azul Linhas Aereas",
+      "fare": 797.27,
+      "departure_time": "16:43",
+      "arrival_time": "19:24"
+    },
+    {
+      "carrier": "Azul Linhas Aereas",
+      "fare": 994.91,
+      "departure_time": "17:21",
+      "arrival_time": "20:48"
+    },
+    {
+      "carrier": "Gol Linhas Aéreas",
+      "fare": 903.47,
+      "departure_time": "17:40",
+      "arrival_time": "19:00"
+    },
+    {
+      "carrier": "Voepass",
+      "fare": 577.19,
+      "departure_time": "17:59",
+      "arrival_time": "19:42"
+    },
+    {
+      "carrier": "Gol Linhas Aéreas",
+      "fare": 920.97,
+      "departure_time": "18:37",
+      "arrival_time": "21:06"
+    },
+    {
+      "carrier": "Latam Airlines",
+      "fare": 1056.0,
+      "departure_time": "19:15",
+      "arrival_time": "22:30"
+    },
+    {
+      "carrier": "Azul Linhas Aereas",
+      "fare": 835.45,
+      "departure_time": "19:34",
+      "arrival_time": "20:42"
+    },
+    {
+      "carrier": "Gol Linhas Aéreas",
+      "fare": 956.06,
+      "departure_time": "19:53",
+      "arrival_time": "21:24"
+    },
+    {
+      "carrier": "Latam Airlines",
+      "fare": 936.1,
+      "departure_time": "20:31",
+      "arrival_time": "22:48"
+    },
+    {
+      "carrier": "Azul Linhas Aereas",
+      "fare": 730.88,
+      "departure_time": "21:09",
+      "arrival_time": "00:12"
+    },
+    {
+      "carrier": "Latam Airlines",
+      "fare": 777.33,
+      "departure_time": "21:28",
+      "arrival_time": "00:54"
+    },
+    {
+      "carrier": "Azul Linhas Aereas",
+      "fare": 615.29,
+      "departure_time": "21:47",
+      "arrival_time": "23:06"
+    },
+    {
+      "carrier": "Voepass",
+      "fare": 450.49,
+      "departure_time": "22:25",
+      "arrival_time": "00:30"
+    },
+    {
+      "carrier": "Gol",
+      "fare": 0.0,
+      "departure_time": "15:00",
+      "arrival_time": "18:20"
+    }
+  ]
+}

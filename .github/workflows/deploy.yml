@@ -1,0 +1,92 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configurar chave SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts 2>/dev/null
+
+      - name: Sincronizar código para a EC2
+        env:
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+          DIR: ${{ secrets.EC2_APP_DIR }}
+        run: |
+          # tar|ssh em vez de rsync: a imagem da EC2 não traz rsync e
+          # instalar pacote a cada deploy é mais frágil que usar o que já
+          # existe. Limpamos apenas o que é código — o `.env.prod` mora só
+          # na instância e nunca pode ser sobrescrito.
+          tar czf - \
+            --exclude='.git' \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='.env*' \
+            --exclude='.internal' \
+            . | ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes \
+            "$USER@$HOST" "mkdir -p '$DIR' && tar xzf - -C '$DIR'"
+
+      - name: Reconstruir e trocar o container
+        env:
+          HOST: ${{ secrets.EC2_HOST }}
+          USER: ${{ secrets.EC2_USER }}
+          DIR: ${{ secrets.EC2_APP_DIR }}
+        run: |
+          # o diretório vai como argumento posicional: dentro de heredoc
+          # com aspas o GitHub não interpola, e é isso que queremos —
+          # o comando remoto deve ser o mesmo texto que está aqui
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$USER@$HOST" \
+            "bash -s -- '$DIR'" <<'REMOTE'
+          set -euo pipefail
+          cd "$1"
+
+          # build da imagem antes de tocar no container em execução
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+            --env-file .env.prod build api
+
+          # troca atômica do serviço api; os providers/redis/postgres seguem
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+            --env-file .env.prod up -d --remove-orphans api
+
+          # descarta imagens antigas para não lotar o disco da t4g.small
+          docker image prune -f > /dev/null
+
+          # health check: 30 tentativas de 2s. Falhou, o step falha e o
+          # deploy fica vermelho — produção continua com a versão anterior
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8000/health > /dev/null; then
+              echo "api saudável após ${i} tentativas"
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "API não respondeu em 60s — deploy falhou"
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml \
+            --env-file .env.prod logs --tail=50 api
+          exit 1
+          REMOTE
+
+      - name: Verificar produção pública
+        run: |
+          for path in /health /status /dashboard /docs; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "https://passhub.abel.dev.br$path")
+            echo "$path → $code"
+            [ "$code" = "200" ] || exit 1
+          done

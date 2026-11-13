@@ -1,0 +1,14 @@
+passhub.abel.dev.br {
+	# UI do Jaeger em /traces. O Jaeger serve na raiz, então o prefixo é
+	# removido antes do proxy. Ficar no mesmo domínio evita abrir porta
+	# nova no firewall e reaproveita o TLS.
+	handle_path /traces* {
+		reverse_proxy jaeger:16686
+	}
+
+	handle {
+		reverse_proxy api:8000
+	}
+
+	encode gzip
+}
