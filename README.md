@@ -4,7 +4,7 @@ Consulta três provedores em paralelo, normaliza, deduplica e decide qual
 oferta mostrar, maximizando margem sem prejudicar o cliente.
 
 **Produção:** https://passhub.abel.dev.br
-`docker compose up -d` · `npm test` (68 testes)
+`docker compose up -d` · `npm test` (70 testes)
 
 ## Requisitos
 
@@ -19,7 +19,7 @@ oferta mostrar, maximizando margem sem prejudicar o cliente.
 | Ordenação consistente | `core/search/ranking.ts` |
 | Regra de negócio | `core/search/selection.ts` · [abaixo](#regra-de-negócio) |
 | Docker Compose | `docker-compose.yml` |
-| Testes | `npm test`, 68 testes em 11 arquivos |
+| Testes | `npm test`, 70 testes em 11 arquivos |
 
 ## Bônus
 
@@ -49,10 +49,10 @@ flowchart TD
 
     B --> C{"Quantas ofertas<br/>no mesmo voo?"}
     C -->|"1"| D["Única opção"]
-    C -->|"2 ou 3"| E["prêmio = preço da maior comissão<br/>− preço da mais barata"]
+    C -->|"2 ou 3"| E["descarta ofertas com<br/>prêmio > min(5%, R$ 30)<br/>sobre a mais barata"]
 
-    E --> F{"prêmio ≤ min(5%, R$ 30)?"}
-    F -->|"Sim"| G["Maior comissão<br/>prêmio pequeno ao cliente"]
+    E --> F{"Sobrou mais de uma?"}
+    F -->|"Sim"| G["Maior comissão entre as permitidas<br/>prêmio pequeno ao cliente"]
     F -->|"Não"| H["Menor preço<br/>comissão não paga o custo"]
 
     D --> I["selectionReason na resposta"]
@@ -85,7 +85,12 @@ O teto de 5% captura todo o ganho disponível, e o maior prêmio ao cliente
 ficou em 2,7%. Abaixo de R$ 600 vale o percentual, acima vale o limite
 absoluto, então a regra não fica frouxa em voo caro.
 
-Com os mocks a guarda nunca dispara, porque o prêmio máximo fica em 2,7%.
+O teto é um filtro, não um teste binário: primeiro descarto as ofertas que
+custariam mais que o teto sobre a mais barata, depois escolho a maior comissão
+entre as que sobraram. Assim uma oferta do meio que cabe no teto não é
+ignorada só porque outra mais cara estourou o limite.
+
+Com os mocks a guarda nunca descarta nada, porque o prêmio máximo fica em 2,7%.
 Ela existe para quando a comissão extra supera o desconto, coberto por
 teste com preço sintético. Cada voo traz `selectionReason`, então a decisão
 é auditável. Implementei as três candidatas para comparar; a API serve só a
@@ -177,7 +182,7 @@ contar agentes distintos. Em produção a API se recusa a subir sem o salt.
 
 ## Deploy
 
-Push no `main` roda o CI (typecheck, 68 testes e build) e, se passar, o
+Push no `main` roda o CI (typecheck, 70 testes e build) e, se passar, o
 deploy sincroniza com a EC2, reconstrói a imagem, troca o container e
 valida as rotas públicas. Se algo falhar, a versão anterior continua no ar.
 

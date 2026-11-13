@@ -37,22 +37,29 @@ export const select = (
     return { offer: offers[0]!, reason: 'única oferta' }
   }
 
-  const bestCommission = maxCommission(offers, table)
   const cheapest = lowestPrice(offers)
   const ceiling = Math.min(cheapest.price * PREMIUM_PCT, PREMIUM_ABS)
-  const premium = bestCommission.price - cheapest.price
+  const allowed = offers.filter(o => o.price - cheapest.price <= ceiling)
+  const chosen = maxCommission(allowed, table)
 
-  if (premium <= ceiling) {
+  if (chosen.price > cheapest.price) {
+    const premium = chosen.price - cheapest.price
     return {
-      offer: bestCommission,
-      reason: `maior comissão dentro do teto (+R$${premium.toFixed(2)})`,
+      offer: chosen,
+      reason: `maior comissão permitida (+R$${premium.toFixed(2)} sobre a mais barata)`,
     }
   }
 
-  return {
-    offer: cheapest,
-    reason: `guarda de preço: comissão custaria +R$${premium.toFixed(2)}`,
+  const best = maxCommission(offers, table)
+
+  if (chosen !== best) {
+    return {
+      offer: chosen,
+      reason: `guarda de preço: maior comissão custaria +R$${(best.price - cheapest.price).toFixed(2)}`,
+    }
   }
+
+  return { offer: chosen, reason: 'maior comissão sem custo ao cliente' }
 }
 
 export const selectLowestPrice = (offers: FlightOffer[]): Selection => ({

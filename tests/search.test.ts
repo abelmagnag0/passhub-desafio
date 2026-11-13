@@ -76,6 +76,14 @@ describe('regra de seleção (guarda de preço)', () => {
     expect(r.reason).toContain('guarda de preço')
   })
 
+  it('não pula a oferta do meio que cabe no teto', () => {
+    // C paga mais comissão, mas custa 20% a mais que a mais barata.
+    // B cabe no teto e paga mais que A; a escolha não pode cair direto em A.
+    const r = select([mk('a', 1000), mk('b', 1020), mk('c', 1200)], providers)
+    expect(r.offer.provider).toBe('b')
+    expect(r.reason).toContain('maior comissão permitida')
+  })
+
   it('aceita exatamente o teto absoluto em voo caro', () => {
     const cheapest = mk('a', 2000)
     const noTeto = mk('c', 2030)
@@ -96,6 +104,12 @@ describe('regra de seleção (guarda de preço)', () => {
     const group = [mk('a', 1000), mk('b', 1000), mk('c', 1000)]
     const r = select(group, providers)
     expect(r.offer.provider).toBe('c')
+  })
+
+  it('comissão maior com mesmo preço não paga prêmio ao cliente', () => {
+    const r = select([mk('a', 1000), mk('c', 1000)], providers)
+    expect(r.offer.provider).toBe('c')
+    expect(r.reason).toBe('maior comissão sem custo ao cliente')
   })
 
   it('savings reflete o desconto que o cliente teria', () => {
