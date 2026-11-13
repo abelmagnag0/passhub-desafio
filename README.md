@@ -188,26 +188,3 @@ valida as rotas públicas. Se algo falhar, a versão anterior continua no ar.
 
 Secrets: `EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY`, `EC2_APP_DIR`. O `.env.prod`
 vive só na instância, ver `.env.example`.
-
-## Trade-offs
-
-- **EC2 com Compose, não Lambda.** Cold start de 1,3 s é ruim num produto
-  aberto dezenas de vezes por dia, e o Compose local é o mesmo de produção.
-  Custa cerca de US$ 14 por mês. Em escala alta a Lambda voltaria a ganhar.
-- **Um banco, não dois.** O Redis responde agregado, mas não funil. Funil
-  precisa de evento bruto, e evento bruto precisa de armazenamento durável.
-- **Guarda de preço em vez de comissão pura.** Abre mão de receita quando o
-  prêmio ao cliente passa do teto. Com os dados atuais, a renúncia é zero.
-- **Jaeger na própria instância.** Custa 9 MB de RAM e não abre porta nova,
-  mas a retenção fica em memória, sem histórico longo.
-
-## Como evoluiria
-
-- Providers reais com mTLS e contrato versionado por adaptador.
-- Invalidação de cache por evento de preço, em vez de esperar o TTL.
-- Réplica de leitura e retenção particionada por mês.
-- SLO explícito com alarme quando o breaker abre.
-- A/B medindo receita contra conversão no menor preço. As duas funções de
-  referência já existem, falta o experimento.
-
-Não colocaria fila no caminho síncrono, porque a latência é o produto.
