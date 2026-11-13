@@ -294,5 +294,4 @@ export const searchKey = (
   origin: string,
   destination: string,
   date: string,
-  strategy: string,
-): string => `search:${origin}:${destination}:${date}:${strategy}`
+): string => `search:${origin}:${destination}:${date}`

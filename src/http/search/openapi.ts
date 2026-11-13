@@ -3,23 +3,7 @@ export const searchSchema = {
   summary: 'Consulta ofertas nos três providers em paralelo',
   description:
     'Timeout de 3s por provider; provider que falha não derruba a resposta ' +
-    '(meta.partial). Cache Redis de 5 min por rota/data/estratégia. O header ' +
-    'x-strategy escolhe a regra de ordenação.',
-  headers: {
-    type: 'object',
-    properties: {
-      'x-strategy': {
-        type: 'string',
-
-        description:
-          'estratégia de seleção: commission_guarded (padrão), lowest_price ' +
-          'ou max_commission. Por padrão, maior comissão dentro da guarda de ' +
-          'preço (5% ou R$30, o que for menor). Valor inválido cai em ' +
-          'commission_guarded — a estratégia aplicada volta em meta.strategy',
-        examples: ['commission_guarded', 'lowest_price', 'max_commission'],
-      },
-    },
-  },
+    '(meta.partial). Cache Redis de 5 min por rota e data.',
   body: {
     type: 'object',
     properties: {

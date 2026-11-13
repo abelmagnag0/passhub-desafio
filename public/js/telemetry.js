@@ -19,14 +19,13 @@ const skeleton = () => `
         .join('')}
     </div>
     <table class="tele-table">
-      <thead><tr><th>Rota</th><th>Data</th><th>Estratégia</th><th>Expira em</th><th>TTL</th></tr></thead>
+      <thead><tr><th>Rota</th><th>Data</th><th>Expira em</th><th>TTL</th></tr></thead>
       <tbody>
         ${Array.from({ length: 3 })
           .map(
             () => `<tr>
               <td><div class="skel-line" style="width:96px;height:13px"></div></td>
               <td><div class="skel-line" style="width:74px;height:13px"></div></td>
-              <td><div class="skel-line" style="width:130px;height:13px"></div></td>
               <td class="ttl-cell"><div class="skel-line" style="width:100%;height:6px;border-radius:3px"></div></td>
               <td class="num"><div class="skel-line" style="width:38px;height:13px;margin-left:auto"></div></td>
             </tr>`,
@@ -70,7 +69,6 @@ const cacheRows = (c) =>
           (e) => `<tr>
             <td class="mono route-cell">${e.origin} → ${e.destination}</td>
             <td class="mono">${e.date}</td>
-            <td class="muted">${e.strategy}</td>
             <td class="ttl-cell">${ttlBar(e.remainingPct, e.ttl)}</td>
             <td class="mono num">${e.ttl}s</td>
           </tr>`,
@@ -96,16 +94,6 @@ const providerRows = (providers, metrics) =>
     })
     .join('')
 
-const strategyRows = (strategies) =>
-  strategies.length === 0
-    ? `<tr><td colspan="2" class="muted">Nenhuma busca registrada ainda.</td></tr>`
-    : strategies
-        .map(
-          (s) =>
-            `<tr><td class="mono">${s.name}</td><td class="mono num">${nf.format(s.total)}</td></tr>`,
-        )
-        .join('')
-
 const markup = () => `
   <div class="dash-panel">
     <div class="panel-head">
@@ -129,7 +117,7 @@ const markup = () => `
     </div>
 
     <table class="tele-table">
-      <thead><tr><th>Rota</th><th>Data</th><th>Estratégia</th><th>Expira em</th><th>TTL</th></tr></thead>
+      <thead><tr><th>Rota</th><th>Data</th><th>Expira em</th><th>TTL</th></tr></thead>
       <tbody data-cache-rows></tbody>
     </table>
   </div>
@@ -144,14 +132,6 @@ const markup = () => `
       <tbody data-provider-rows></tbody>
     </table>
 
-    <div class="panel-head" style="margin-top:18px">
-      <h4 class="dash-title">Buscas por estratégia</h4>
-      <span class="panel-sub" data-cache-hits></span>
-    </div>
-    <table class="tele-table">
-      <thead><tr><th>Estratégia</th><th>Total</th></tr></thead>
-      <tbody data-strategy-rows></tbody>
-    </table>
   </div>`
 
 const parseMetrics = (text) => {
@@ -198,7 +178,6 @@ const paint = (data, metrics) => {
   set('[data-searches]', nf.format(data.searches))
   set('[data-rate]', data.hitRate == null ? '—' : `${data.hitRate.toLocaleString('pt-BR')}%`)
 
-  set('[data-cache-hits]', `${nf.format(metrics.cacheHits)} desde o restart`)
 
   const cacheBody = el.querySelector('[data-cache-rows]')
   const cacheHtml = cacheRows(c)
@@ -212,13 +191,6 @@ const paint = (data, metrics) => {
   if (provBody && provBody.dataset.sig !== provHtml) {
     provBody.innerHTML = provHtml
     provBody.dataset.sig = provHtml
-  }
-
-  const stratBody = el.querySelector('[data-strategy-rows]')
-  const stratHtml = strategyRows(data.strategies)
-  if (stratBody && stratBody.dataset.sig !== stratHtml) {
-    stratBody.innerHTML = stratHtml
-    stratBody.dataset.sig = stratHtml
   }
 }
 

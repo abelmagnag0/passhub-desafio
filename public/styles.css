@@ -302,6 +302,7 @@ code { background: var(--bg); border: 1px solid var(--border); padding: 2px 6px;
   border-radius: 10px;
   padding: 6px 10px;
   min-height: 40px;
+  cursor: pointer;
 }
 
 .date-input:focus-within { outline: 2px solid var(--brand); border-color: transparent; }

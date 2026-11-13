@@ -47,6 +47,9 @@ services:
   # 2 GB e o serviço não pode competir com a API por memória
   jaeger:
     image: jaegertracing/all-in-one:1.76.0
+    # base-path faz o SPA do Jaeger buscar /traces/api/... em vez de /api/...
+    # quando servido atrás de um proxy. Sem isso, a UI abre branca.
+    command: ["--query.base-path=/traces"]
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
       MEMORY_MAX_TRACES: "500"

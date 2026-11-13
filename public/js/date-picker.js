@@ -93,7 +93,10 @@ export const renderDateButtons = () => {
 
 renderDateButtons()
 
-$('#date-depart-btn').addEventListener('click', (e) => {
+// o alvo é o wrapper inteiro: clicar no ícone, no vazio ou no texto da
+// data precisa abrir o calendário. Antes o listener ficava só no botão e
+// só a área exata do texto respondia.
+$('#date-depart-wrap').addEventListener('click', (e) => {
   e.stopPropagation()
   pickerTarget === 'depart' ? closePicker() : openPicker('depart')
 })

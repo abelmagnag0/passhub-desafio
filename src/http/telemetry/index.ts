@@ -35,7 +35,6 @@ export const telemetryRoutes = (app: FastifyInstance, deps: Deps): void => {
                         origin: { type: 'string' },
                         destination: { type: 'string' },
                         date: { type: 'string' },
-                        strategy: { type: 'string' },
                         ttl: { type: 'integer' },
                         remainingPct: { type: 'integer' },
                       },
@@ -78,14 +77,13 @@ export const telemetryRoutes = (app: FastifyInstance, deps: Deps): void => {
       const entries = inventoried
         .map(({ key, ttl }) => {
 
-          const [prefix, origin, destination, date, strategy] = key.split(':')
+          const [prefix, origin, destination, date] = key.split(':')
           if (prefix !== 'search') return null
           return {
             key,
             origin: origin ?? '',
             destination: destination ?? '',
             date: date ?? '',
-            strategy: strategy ?? '',
             ttl,
             remainingPct: Math.max(
               0,

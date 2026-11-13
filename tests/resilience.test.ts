@@ -187,7 +187,7 @@ describe.skipIf(!temRedis)('cache', () => {
   it('grava a resposta com TTL de 5 minutos', async () => {
     const cache = new Cache('redis://localhost:6379')
     await cache.connect()
-    const key = searchKey('GRU', 'GIG', '2027-01-01', 'commission_guarded')
+    const key = searchKey('GRU', 'GIG', '2027-01-01')
     await cache.set(key, { ok: true })
 
     const { Redis } = await import('ioredis')

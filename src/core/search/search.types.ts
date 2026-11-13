@@ -1,6 +1,5 @@
 // Types
 import type { consolidate } from './service.js'
-import type { Strategy } from './selection.js'
 
 export type ProviderMeta = {
   name: string
@@ -18,7 +17,7 @@ export type SearchResponse = {
     providers: ProviderMeta[]
     partial: boolean
     cache: 'HIT' | 'MISS'
-    strategy: Strategy
+    strategy: string
     generatedAt: string
   }
 }

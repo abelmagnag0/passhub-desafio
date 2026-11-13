@@ -9,7 +9,7 @@ import type { Deps } from '../../container.js'
 import { providers } from '../../config/index.js'
 import type { SearchResponse } from '../../core/search/search.types.js'
 import { consolidate } from '../../core/search/service.js'
-import { strategySchema, type Strategy } from '../../core/search/selection.js'
+import { STRATEGY_NAME } from '../../core/search/selection.js'
 import { searchKey } from '../../adapters/cache/redis.js'
 import { breakerState } from '../../adapters/http/providers/client.js'
 import {
@@ -38,11 +38,8 @@ export const createSearchController = (deps: Deps) => {
     }
 
     const { origin, destination, date } = parsed.data
-    const strategy: Strategy = strategySchema
-      .catch('commission_guarded')
-      .parse(req.headers['x-strategy'])
     const route = `${origin} → ${destination}`
-    const key = searchKey(origin, destination, date, strategy)
+    const key = searchKey(origin, destination, date)
     const agentHashId = agentHash.of(req.ip)
 
     const cached = await withSpan(
@@ -63,7 +60,7 @@ export const createSearchController = (deps: Deps) => {
         origin,
         destination,
         date,
-        strategy,
+        strategy: STRATEGY_NAME,
         partial: cached.meta.partial,
         latencyMs: 0,
         cacheHit: true,
@@ -89,12 +86,12 @@ export const createSearchController = (deps: Deps) => {
     const response: SearchResponse = {
       requestId,
       request: { origin, destination, date },
-      flights: consolidate(offers, strategy, providers),
+      flights: consolidate(offers, providers),
       meta: {
         providers: metas,
         partial: okCount < 3,
         cache: 'MISS',
-        strategy,
+        strategy: STRATEGY_NAME,
         generatedAt: new Date().toISOString(),
       },
     }
@@ -104,7 +101,7 @@ export const createSearchController = (deps: Deps) => {
       { 'cache.key': key, 'cache.system': 'redis' },
       () => cache.set(key, response),
     )
-    searchRequests.inc({ strategy, partial: String(response.meta.partial) })
+    searchRequests.inc({ strategy: STRATEGY_NAME, partial: String(response.meta.partial) })
 
     const totalLatency = metas.reduce((acc, m) => acc + m.latencyMs, 0)
     await insights.record({
@@ -112,7 +109,7 @@ export const createSearchController = (deps: Deps) => {
       route,
       latencyMs: totalLatency,
       partial: response.meta.partial,
-      strategy,
+      strategy: STRATEGY_NAME,
       providers: metas.map((m) => ({ name: m.name, latencyMs: m.latencyMs })),
 
       savings: response.flights.reduce(
@@ -123,13 +120,13 @@ export const createSearchController = (deps: Deps) => {
 
     const searchId = await withSpan(
       'db.record_search',
-      { 'db.system': 'postgres', 'search.strategy': strategy },
+      { 'db.system': 'postgres', 'search.strategy': STRATEGY_NAME },
       () =>
         db.recordSearch({
           origin,
           destination,
           date,
-          strategy,
+          strategy: STRATEGY_NAME,
           partial: response.meta.partial,
           latencyMs: totalLatency,
           agentHash: agentHashId,
@@ -154,7 +151,7 @@ export const createSearchController = (deps: Deps) => {
         origin,
         destination,
         date,
-        strategy,
+        strategy: STRATEGY_NAME,
         flights: response.flights.length,
         partial: response.meta.partial,
       },
