@@ -7,6 +7,12 @@ import { closeDeps, createDeps, type DepsFactory } from './container.js'
 // Routes
 import { registerRoutes } from './http/routes.js'
 
+declare module 'fastify' {
+  interface FastifyInstance {
+    deps: Awaited<ReturnType<DepsFactory>>
+  }
+}
+
 export const buildApp = async (depsFactory: DepsFactory = createDeps) => {
   const app = Fastify({
     logger: { level: process.env.LOG_LEVEL ?? 'info' },
@@ -15,6 +21,10 @@ export const buildApp = async (depsFactory: DepsFactory = createDeps) => {
   })
 
   const deps = await depsFactory(app.log)
+
+  // as deps ficam no app para quem monta (server.ts) poder iniciar o
+  // probe periódico sem recriar cache/banco
+  app.decorate('deps', deps)
 
   await registerRoutes(app, deps)
 

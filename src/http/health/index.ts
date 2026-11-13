@@ -6,11 +6,9 @@ import type { Deps } from '../../container.js'
 import {
   HEALTH_COMPONENTS,
   HISTORY_HOURS,
-  probeProvider,
   readHistory,
-  recordHour,
-  type ComponentStatus,
 } from '../../adapters/telemetry/health-history.js'
+import { probeAll } from '../../adapters/telemetry/probe.js'
 
 export const healthRoutes = (app: FastifyInstance, deps: Deps): void => {
   const { cache, db } = deps
@@ -54,41 +52,12 @@ export const healthRoutes = (app: FastifyInstance, deps: Deps): void => {
       },
     },
     async () => {
-      const providerChecks = await Promise.all([
-        probeProvider('a'),
-        probeProvider('b'),
-        probeProvider('c'),
-      ])
-      const redisOk = await cache.ping()
-
-      const pgOk = db.enabled ? await db.ping() : false
-
-      const statuses: ComponentStatus[] = [
-        { component: 'aggregator', ok: true, detail: 'liveness' },
-        {
-          component: 'redis',
-          ok: redisOk,
-          detail: redisOk ? 'PONG' : 'sem resposta',
-        },
-        ...(db.enabled
-          ? [
-              {
-                component: 'postgres',
-                ok: pgOk,
-                detail: pgOk ? 'conexão ok' : 'sem resposta',
-              },
-            ]
-          : []),
-        ...providerChecks,
-      ]
-      await recordHour(cache, statuses)
-
-      const tudoOk = statuses.every((s) => s.ok)
+      const { statuses, redis, postgres, ok } = await probeAll(cache, db)
 
       return {
-        status: tudoOk ? 'ok' : 'degraded',
-        redis: redisOk,
-        postgres: db.enabled && pgOk,
+        status: ok ? 'ok' : 'degraded',
+        redis,
+        postgres,
         providers: statuses
           .filter(s => s.component.startsWith('provider'))
           .map(s => ({

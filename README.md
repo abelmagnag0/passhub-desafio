@@ -1,133 +1,172 @@
-# PassHub — Agregador de Provedores de Voos
+# PassHub: Agregador de Provedores de Voos
 
 Consulta três provedores em paralelo, normaliza, deduplica e decide qual
-oferta mostrar — maximizando margem sem prejudicar o cliente.
+oferta mostrar, maximizando margem sem prejudicar o cliente.
 
 **Produção:** https://passhub.abel.dev.br
-`docker compose up -d` · `npm test` (65 testes)
+`docker compose up -d` · `npm test` (68 testes)
 
-## Requisitos → onde estão
+## Requisitos
 
-Cada linha tem a prova: um link que abre em produção, um comando que roda, ou
-o arquivo que implementa.
-
-### Funcionais
-
-| Requisito | Prova |
+| Requisito | Onde está |
 |---|---|
 | `POST /search` | [Swagger](https://passhub.abel.dev.br/docs) · `src/http/search/` |
-| Consultas paralelas aos 3 providers | `src/adapters/http/providers/fan-out.ts` — `Promise.allSettled` |
-| Timeout de 3 s por provider | `client.ts:8` — `TIMEOUT_MS = 3_000` |
-| Continua se um provider falhar | `docker compose --profile chaos up` derruba o provider-c · `tests/resilience.test.ts` (4 casos: 500, timeout, erro, lento) |
-| Cache Redis TTL 5 min | [tela de telemetria](https://passhub.abel.dev.br/telemetria) mostra o TTL de cada entrada descendo · `tests/resilience.test.ts` assere 300 s |
-| Normalização em modelo único | `src/core/search/adapters/index.ts` (centavos→real, ISO→UTC, descarta USD e preço≤0) · `tests/adapters.test.ts` |
-| Ordenação consistente | `src/core/search/ranking.ts` — partida → preço → companhia, determinístico |
-| Regra de negócio aplicada | `src/core/search/selection.ts` — uma regra só · [seção abaixo](#regra-de-negócio) |
-| Resposta única ao cliente | 60 voos deduplicados em `POST /search` |
-| README com arquitetura e trade-offs | este arquivo |
-| Docker Compose | `docker-compose.yml` (7 serviços, perfis `chaos` e `observability`) |
-| Testes automatizados | `npm test` — 65 testes em 11 arquivos |
+| Consultas paralelas | `fan-out.ts`, `Promise.allSettled` |
+| Timeout de 3 s por provider | `client.ts`, `TIMEOUT_MS = 3_000` |
+| Continua se um provider falhar | `docker compose --profile chaos up` · `tests/resilience.test.ts` |
+| Cache Redis TTL 5 min | [telemetria](https://passhub.abel.dev.br/telemetria) com o TTL descendo |
+| Normalização | `core/search/adapters/` · `tests/adapters.test.ts` |
+| Ordenação consistente | `core/search/ranking.ts` |
+| Regra de negócio | `core/search/selection.ts` · [abaixo](#regra-de-negócio) |
+| Docker Compose | `docker-compose.yml` |
+| Testes | `npm test`, 68 testes em 11 arquivos |
 
-### Bônus
+## Bônus
 
-| Bônus | Prova |
+| Item | Onde está |
 |---|---|
-| Retry exponencial | `client.ts` — backoff 100 ms·2ⁿ com jitter |
-| Circuit Breaker | `breaker.ts` (5 falhas abre, 15 s meio-aberto) · [estado ao vivo](https://passhub.abel.dev.br/telemetria) |
-| OpenTelemetry | **[Jaeger em produção](https://passhub.abel.dev.br/traces/)** — um `/search` gera 30 spans, do HTTP ao `COMMIT` |
-| Logs estruturados | Pino; cada busca loga rota, estratégia, voos e `partial` |
-| Métricas Prometheus | [`/metrics`](https://passhub.abel.dev.br/metrics) — buscas por estratégia, cache, latência por provider, breaker |
-| Health Check | [`/health`](https://passhub.abel.dev.br/health) · [`/status`](https://passhub.abel.dev.br/status) · [`/status/proof`](https://passhub.abel.dev.br/status/proof) |
-| GitHub Actions | `.github/workflows/ci.yml` + `deploy.yml` (deploy automático no push) |
-| Docker Multi-stage | `Dockerfile` — `build` → `runtime`, usuário não-root |
-| Feature Flags | **não implementado** — ver [trade-offs](#trade-offs). A regra de seleção é decisão de produto, não flag de rollout |
-| Deploy em cloud com IP público | https://passhub.abel.dev.br (EC2 + Caddy/TLS) |
-| Banco + dashboard de insights | [Dashboard](https://passhub.abel.dev.br/dashboard) · [funil](https://passhub.abel.dev.br/insights/funnel) · 4 tabelas no Postgres |
-| Melhoria arquitetural | `tests/architecture.test.ts` — falha o CI se as camadas forem violadas |
+| Retry exponencial | `client.ts`, backoff 100 ms·2ⁿ com jitter |
+| Circuit breaker | `breaker.ts`, 5 falhas abre, 15 s meio-aberto |
+| OpenTelemetry | [Jaeger em produção](https://passhub.abel.dev.br/traces/), 30 spans por busca |
+| Logs estruturados | Pino, cada busca loga rota, latência e `partial` |
+| Prometheus | [`/metrics`](https://passhub.abel.dev.br/metrics) |
+| Health Check | [`/health`](https://passhub.abel.dev.br/health) · [`/status`](https://passhub.abel.dev.br/status) |
+| GitHub Actions | `ci.yml` e `deploy.yml` |
+| Docker multi-stage | `Dockerfile`, build e runtime, usuário não-root |
+| Cloud com IP público | https://passhub.abel.dev.br |
+| Banco + dashboard | [Dashboard](https://passhub.abel.dev.br/dashboard) · [funil](https://passhub.abel.dev.br/insights/funnel) |
+| Melhoria arquitetural | `tests/architecture.test.ts` quebra o CI se as camadas forem violadas |
+
+## Regra de negócio
+
+O mesmo voo chega de vários providers com preço e comissão diferentes.
+Escolher sempre a maior comissão maximiza a receita por venda, mas cobrar
+mais do que o cliente cotaria direto perde a venda e o cliente.
+
+```mermaid
+flowchart TD
+    A(["3 providers responderam"]) --> B["Normaliza e deduplica<br/>companhia + partida + chegada"]
+
+    B --> C{"Quantas ofertas<br/>no mesmo voo?"}
+    C -->|"1"| D["Única opção"]
+    C -->|"2 ou 3"| E["prêmio = preço da maior comissão<br/>− preço da mais barata"]
+
+    E --> F{"prêmio ≤ min(5%, R$ 30)?"}
+    F -->|"Sim"| G["Maior comissão<br/>prêmio pequeno ao cliente"]
+    F -->|"Não"| H["Menor preço<br/>comissão não paga o custo"]
+
+    D --> I["selectionReason na resposta"]
+    G --> I
+    H --> I
+
+    classDef ok fill:#dcfce7,stroke:#15803d
+    classDef warn fill:#fee2e2,stroke:#b91c1c
+    classDef neutral fill:#f3f4f6,stroke:#6b7280
+    class G ok
+    class H warn
+    class D neutral
+```
+
+### Por que esse teto
+
+Medi os 35 voos dos mocks em que a maior comissão paga mais que a menor. Escolhendo
+sempre a maior, o cliente paga R$ 631,81 a mais e a casa ganha R$ 190,07.
+A razão é 0,30: cada real que o cliente perde vira 30 centavos para a casa.
+Em nenhum deles a comissão extra cobre o preço extra.
+
+| Critério | Receita por busca | vs. menor preço |
+|---|---|---|
+| menor preço sempre | R$ 668,70 | nenhuma |
+| 2% ou R$ 20 | R$ 750,23 | +12,2% |
+| 3% ou R$ 25 | R$ 837,60 | +25,3% |
+| **5% ou R$ 30** | **R$ 858,77** | **+28,4%** |
+
+O teto de 5% captura todo o ganho disponível, e o maior prêmio ao cliente
+ficou em 2,7%. Abaixo de R$ 600 vale o percentual, acima vale o limite
+absoluto, então a regra não fica frouxa em voo caro.
+
+Com os mocks a guarda nunca dispara, porque o prêmio máximo fica em 2,7%.
+Ela existe para quando a comissão extra supera o desconto, coberto por
+teste com preço sintético. Cada voo traz `selectionReason`, então a decisão
+é auditável. Implementei as três candidatas para comparar; a API serve só a
+escolhida, e as outras duas ficam como `selectLowestPrice` e
+`selectMaxCommission` no teste de comparativo.
 
 ## Como a busca funciona
 
 ```
 POST /search
-  ├─ valida (Zod) · cache Redis (TTL 300s) → HIT devolve em ~150 ms
-  ├─ fan-out paralelo: timeout 3s · retry · circuit breaker por provider
-  ├─ adaptadores → modelo único → dedupe → seleção → ranking
-  └─ persiste busca e ofertas no Postgres
+  valida (Zod), consulta o cache (TTL 300s) e devolve em ~150ms se houver HIT
+  senão chama os 3 providers em paralelo, com timeout, retry e breaker
+  normaliza, deduplica, aplica a regra e ordena
+  grava a busca e as ofertas no Postgres
 ```
 
-Provider fora não derruba a resposta: devolve os voos dos que responderam com
-`meta.partial = true`.
-
-## Regra de negócio
-
-O mesmo voo chega de vários providers com preço e comissão diferentes.
-
-```mermaid
-flowchart TD
-    A([Ofertas do mesmo voo]) --> B{Quantas?}
-    B -->|1| C[Única opção]
-    B -->|2+| D["prêmio = maior comissão − menor preço"]
-    D --> F{"prêmio ≤ min(5%, R$ 30)?"}
-    F -->|Sim| G[<b>Maior comissão</b><br/>ganho dentro do teto]
-    F -->|Não| H[<b>Menor preço</b><br/>guarda de preço]
-
-    style G fill:#e8f5e9,stroke:#2e7d32
-    style H fill:#e3f2fd,stroke:#1565c0
-    style C fill:#f5f5f5,stroke:#757575
-```
-
-Comissão pura maximiza receita por venda, mas cobrar mais que a cotação direta
-perde a venda e o cliente. Medido nos mocks, nos 35 voos em que a maior
-comissão paga mais: **o cliente paga R$ 631,81 a mais e a casa ganha R$ 190,07**
-— razão 0,30. A casa ganha 30 centavos por real que o cliente perde.
-
-| Teto | Receita | vs. menor preço |
-|---|---|---|
-| menor preço sempre | R$ 668,70 | — |
-| 2% / R$ 20 | R$ 750,23 | +12,2% |
-| 3% / R$ 25 | R$ 837,60 | +25,3% |
-| **5% / R$ 30** | **R$ 858,77** | **+28,4%** |
-
-O teto de 5% captura todo o ganho disponível, com prêmio máximo de 2,7% ao
-cliente. Acima de R$ 600 o limite absoluto morde primeiro — o `min()` evita
-regra frouxa em voo caro.
-
-Com estes dados a guarda nunca dispara; ela é a salvaguarda para quando a
-diferença de comissão superar o desconto, coberto por teste sintético. Cada
-voo devolve `selectionReason`, então a decisão é auditável.
-
-**Uma regra, não três.** Cheguei a implementar as três candidatas para medir;
-a API serve só a escolhida. As outras duas continuam no código como
-`selectLowestPrice` e `selectMaxCommission`, usadas pelos testes de
-comparativo — são a evidência que justifica a decisão, não uma configuração.
+Provider fora não derruba a resposta: o cliente recebe os voos de quem
+respondeu e `meta.partial: true`.
 
 ## Estrutura
 
 ```
 src/
-  server.ts · app.ts · container.ts    entrypoint e injeção de dependência
-  core/search/                         regra pura: modelo, adaptadores, dedupe, seleção
-  adapters/                            cache · db/postgres · http/providers · security · telemetry
-  config/                              env validado e tabela de comissões
-  http/                                uma pasta por rota
-public/   UI estática
-tests/    unidade, integração, resiliência e arquitetura
-mocks/    os três providers do desafio (intocados)
+  core/search/     regra pura: modelo, adaptadores, dedupe, seleção
+  adapters/        cache, postgres, http dos providers, telemetria
+  config/          env validado e tabela de comissões
+  http/            uma pasta por rota
+  server.ts, app.ts, container.ts
+public/  UI · tests/  unidade, integração, resiliência, arquitetura · mocks/
 ```
 
-`tests/architecture.test.ts` trava as camadas: `core` não importa `adapters`,
-`http` nem `config` e não usa biblioteca de I/O; `adapters` não importa
-`http`; nenhum arquivo pode ficar órfão.
+`tests/architecture.test.ts` garante que `core` não importa `adapters`,
+`http` nem `config`, e que nenhum arquivo fica órfão.
+
+```mermaid
+flowchart TB
+    agent(["Agente de viagem"]) --> caddy["Caddy<br/>TLS + proxy"]
+    browser(["Navegador"]) --> caddy
+
+    subgraph api["API Fastify :8000"]
+        direction TB
+        routes["rotas<br/>http/"] --> core["regra de negócio<br/>core/search"]
+        core --> adp["adapters/"]
+    end
+
+    caddy --> routes
+
+    adp --> pa["provider-a"]
+    adp --> pb["provider-b"]
+    adp --> pc["provider-c"]
+
+    adp --> redis[("Redis<br/>cache 300s")]
+    adp --> pg[("Postgres<br/>busca, oferta, clique")]
+    adp -.->|"emite spans"| jaeger["Jaeger"]
+    adp -.->|"expõe"| metrics["/metrics"]
+
+    browser -.->|"lê telemetria"| metrics
+    browser -.->|"abre /traces"| jaeger
+
+    classDef store fill:#e8f0fe,stroke:#1a56db
+    classDef prov fill:#f0fdf4,stroke:#15803d
+    classDef obs fill:#fef9e7,stroke:#b45309
+    class redis,pg store
+    class pa,pb,pc prov
+    class jaeger,metrics obs
+```
+
+A tela de telemetria lê `/metrics` direto no navegador; nenhum Prometheus
+faz scrape em produção.
 
 ## Dados
 
-Postgres: `providers` (comissão, uma vez só), `searches`, `search_offers`
-(voo × provider, com `chosen`) e `clicks` (FK `search_id`). Conversão é JOIN.
+Postgres guarda `providers` (a comissão existe uma vez só), `searches`,
+`search_offers` (voo por provider, com a flag `chosen`) e `clicks`, que
+aponta para a busca por FK. Conversão é JOIN.
 
-Redis: cache de resposta (TTL 5 min) e contadores horários. Descartável.
+Redis guarda o cache de resposta com 5 minutos e os contadores horários.
+Perder uma entrada só custa uma busca a mais.
 
-LGPD: o IP nunca é gravado — só `sha256(IP_SALT + ip)` truncado. Sem salt, a
-API se recusa a subir em produção.
+O IP nunca é gravado. Só `sha256(IP_SALT + ip)` truncado, suficiente para
+contar agentes distintos. Em produção a API se recusa a subir sem o salt.
 
 ## Interface
 
@@ -138,39 +177,32 @@ API se recusa a subir em produção.
 
 ## Deploy
 
-Push no `main` → `ci.yml` (typecheck + 65 testes + build) → `deploy.yml`
-sincroniza a EC2, reconstrói, troca o container e valida `/health` e as rotas
-públicas. Falhou, a versão anterior continua no ar.
+Push no `main` roda o CI (typecheck, 68 testes e build) e, se passar, o
+deploy sincroniza com a EC2, reconstrói a imagem, troca o container e
+valida as rotas públicas. Se algo falhar, a versão anterior continua no ar.
 
-Secrets: `EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY`, `EC2_APP_DIR`.
-O `.env.prod` vive só na instância — ver `.env.example`.
+Secrets: `EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY`, `EC2_APP_DIR`. O `.env.prod`
+vive só na instância, ver `.env.example`.
 
 ## Trade-offs
 
-- **EC2 com Compose, não Lambda.** Cold start de ~1,3 s é falha de UX num
-  produto aberto dezenas de vezes por dia; o Compose local é o mesmo de
-  produção. Custo: ~US$14/mês. Em escala alta a Lambda voltaria a vencer.
-- **Um banco, não dois.** Redis responde agregado, não funil; funil exige
-  evento bruto, e um segundo banco para o mesmo domínio seria overengineering.
-- **Sem feature flag.** Não há decisão que exija rollback em minutos.
-  A regra de seleção é decisão de produto — se mudar, muda para todos.
-- **Guarda de preço sobre comissão pura.** Abre mão de receita quando o prêmio
-  ao cliente passa do teto — com os dados atuais a renúncia é de 0%.
-- **Uma estratégia, não três.** A API serve só a regra adotada. Comparar três
-  por header transferiria ao cliente uma decisão de produto e faria o contrato
-  parecer indeciso; o comparativo vive no teste.
-- **Jaeger na própria instância** em vez de coletor externo: 9 MB de RAM e
-  sem abrir porta nova. Trade-off: retenção em memória (500 traces), sem
-  histórico de longo prazo.
+- **EC2 com Compose, não Lambda.** Cold start de 1,3 s é ruim num produto
+  aberto dezenas de vezes por dia, e o Compose local é o mesmo de produção.
+  Custa cerca de US$ 14 por mês. Em escala alta a Lambda voltaria a ganhar.
+- **Um banco, não dois.** O Redis responde agregado, mas não funil. Funil
+  precisa de evento bruto, e evento bruto precisa de armazenamento durável.
+- **Guarda de preço em vez de comissão pura.** Abre mão de receita quando o
+  prêmio ao cliente passa do teto. Com os dados atuais, a renúncia é zero.
+- **Jaeger na própria instância.** Custa 9 MB de RAM e não abre porta nova,
+  mas a retenção fica em memória, sem histórico longo.
 
-## Como evoluiria em produção
+## Como evoluiria
 
 - Providers reais com mTLS e contrato versionado por adaptador.
 - Invalidação de cache por evento de preço, em vez de esperar o TTL.
 - Réplica de leitura e retenção particionada por mês.
-- SLO explícito (p99 < 2,5 s, parcial < 1%) com alarme quando o breaker abre;
-  trace com collector ADOT e retenção durável.
-- A/B medindo receita × conversão contra o menor preço — as duas funções
-  de referência já existem; falta o experimento.
+- SLO explícito com alarme quando o breaker abre.
+- A/B medindo receita contra conversão no menor preço. As duas funções de
+  referência já existem, falta o experimento.
 
-Não colocaria fila no caminho síncrono: a latência é o produto.
+Não colocaria fila no caminho síncrono, porque a latência é o produto.
