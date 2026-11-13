@@ -22,13 +22,12 @@ export const buildApp = async (depsFactory: DepsFactory = createDeps) => {
 
   const deps = await depsFactory(app.log)
 
-  // as deps ficam no app para quem monta (server.ts) poder iniciar o
-  // probe periódico sem recriar cache/banco
   app.decorate('deps', deps)
 
   await registerRoutes(app, deps)
 
   const ROTAS_MEDIDAS = ['/search', '/events', '/insights', '/health', '/status']
+
   app.addHook('onResponse', async (req, reply) => {
     if (!ROTAS_MEDIDAS.some((r) => req.url.startsWith(r))) return
     void deps.insights.record({ type: 'request', status: reply.statusCode })
