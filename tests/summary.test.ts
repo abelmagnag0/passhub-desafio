@@ -148,10 +148,12 @@ describe('fromPostgres', () => {
   })
 
   it('converte a série em hora local e agrupa 7d por dia', () => {
+    const horasAtras = (h: number) =>
+      new Date(Date.now() - h * 3_600_000).toISOString()
     const raw = {
       volume: [
-        { hour: '2026-11-12T15:00:00.000Z', searches: 5, partial: 1 },
-        { hour: '2026-11-12T17:00:00.000Z', searches: 2, partial: 0 },
+        { hour: horasAtras(2), searches: 5, partial: 1 },
+        { hour: horasAtras(4), searches: 2, partial: 0 },
       ],
       totals: { total_searches: 7, clicks: 3, cache_hits: 2 },
       routes: [{ route: 'GRU-GIG', searches: 7, avg_latency: 120 }],
@@ -167,15 +169,16 @@ describe('fromPostgres', () => {
     )
     const comBusca = hora.buckets.filter((b) => b.searches > 0)
 
-    expect(comBusca.map((b) => b.hour)).toEqual(['2026-11-12T12', '2026-11-12T14'])
+    expect(comBusca.map((b) => b.hour).sort()).toEqual(
+      [horasAtras(4), horasAtras(2)].map((h) => hourKey(new Date(h))).sort(),
+    )
     expect(hora.totals.searches).toBe(7)
 
     const dia = fromPostgres(raw, 168)!
     expect(dia.resolution).toBe('dia')
-    expect(dia.buckets.map((b) => b.hour)).toContain('2026-11-12')
-    expect(
-      dia.buckets.find((b) => b.hour === '2026-11-12')!.searches,
-    ).toBe(7)
+    const hoje = hourKey().slice(0, 10)
+    expect(dia.buckets.map((b) => b.hour)).toContain(hoje)
+    expect(dia.buckets.find((b) => b.hour === hoje)!.searches).toBe(7)
   })
 })
 
